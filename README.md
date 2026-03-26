@@ -2,8 +2,6 @@
 
 > AWS サーバーレスアーキテクチャで構築した、画像アップロード・自動リサイズ API
 
-![Architecture](docs/images/architecture.png)
-
 ## Overview
 
 S3 にアップロードされた画像を Lambda で自動リサイズし、CloudFront 経由で高速配信するサーバーレス API です。
@@ -184,8 +182,6 @@ Response: 204 No Content
 │   ├── requirements.md          # 要件定義
 │   ├── architecture.md          # アーキテクチャ設計書
 │   ├── cost-estimate.md         # コスト見積もり
-│   ├── images/                  # 図版
-│   │   └── architecture.png
 │   └── adr/                     # Architecture Decision Records
 │       ├── 001-serverless-architecture.md
 │       ├── 002-dynamodb-over-rds.md
@@ -213,7 +209,6 @@ Response: 204 No Content
 │   │   │   ├── get_image.py
 │   │   │   └── delete_image.py
 │   │   └── utils/
-│   │       ├── image_processor.py
 │   │       └── response.py
 │   ├── tests/
 │   │   ├── test_upload.py
