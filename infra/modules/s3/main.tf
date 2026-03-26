@@ -32,7 +32,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "images" {
   bucket = aws_s3_bucket.images.id
 
   rule {
-    id     = "transition-to-ia"
+    id     = "original-transition-to-ia"
     status = "Enabled"
 
     transition {
@@ -42,6 +42,20 @@ resource "aws_s3_bucket_lifecycle_configuration" "images" {
 
     filter {
       prefix = "original/"
+    }
+  }
+
+  rule {
+    id     = "resized-transition-to-ia"
+    status = "Enabled"
+
+    transition {
+      days          = 90
+      storage_class = "STANDARD_IA"
+    }
+
+    filter {
+      prefix = "resized/"
     }
   }
 }

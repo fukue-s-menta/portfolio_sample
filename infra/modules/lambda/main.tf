@@ -26,7 +26,7 @@ resource "aws_lambda_function" "upload" {
 # --- Resize Lambda ---
 data "archive_file" "resize" {
   type        = "zip"
-  source_dir  = "${path.module}/../../../../app/src/handlers"
+  source_file = "${path.module}/../../../../app/src/handlers/resize.py"
   output_path = "${path.module}/builds/resize.zip"
 }
 
