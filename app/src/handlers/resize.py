@@ -2,6 +2,7 @@
 
 import io
 import json
+import logging
 import os
 import urllib.parse
 from datetime import datetime, timezone
@@ -16,6 +17,9 @@ S3_BUCKET = os.environ["S3_BUCKET"]
 TABLE_NAME = os.environ["DYNAMODB_TABLE"]
 CLOUDFRONT_DOMAIN = os.environ["CLOUDFRONT_DOMAIN"]
 table = dynamodb.Table(TABLE_NAME)
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 RESIZE_CONFIGS = {
     "thumb":  {"width": 150, "height": 150, "crop": True},
@@ -36,8 +40,23 @@ def handler(event, context):
         image_id = filename.rsplit(".", 1)[0]
         ext = filename.rsplit(".", 1)[1]
 
-        response = s3.get_object(Bucket=bucket, Key=key)
-        original_image = Image.open(io.BytesIO(response["Body"].read()))
+        try:
+            response = s3.get_object(Bucket=bucket, Key=key)
+            original_image = Image.open(io.BytesIO(response["Body"].read()))
+        except Exception as e:
+            logger.error("Failed to open image %s: %s", key, e)
+            now = datetime.now(timezone.utc).isoformat()
+            table.update_item(
+                Key={"image_id": image_id},
+                UpdateExpression="SET #status = :status, error_message = :err, updated_at = :now",
+                ExpressionAttributeNames={"#status": "status"},
+                ExpressionAttributeValues={
+                    ":status": "error",
+                    ":err": str(e),
+                    ":now": now,
+                },
+            )
+            continue
 
         resized_urls = {}
 
