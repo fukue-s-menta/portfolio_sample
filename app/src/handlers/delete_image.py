@@ -1,9 +1,10 @@
 """Delete image handler — removes original, resized images and metadata."""
 
-import json
 import os
 
 import boto3
+
+from utils.response import api_response
 
 s3 = boto3.client("s3")
 dynamodb = boto3.resource("dynamodb")
@@ -20,7 +21,7 @@ def handler(event, context):
     item = response.get("Item")
 
     if not item:
-        return _response(404, {"error": "Image not found"})
+        return api_response(404, {"error": "Image not found"})
 
     # Delete original from S3
     s3_key = item.get("s3_key")
@@ -36,15 +37,4 @@ def handler(event, context):
     # Delete metadata from DynamoDB
     table.delete_item(Key={"image_id": image_id})
 
-    return _response(204, "")
-
-
-def _response(status_code, body):
-    return {
-        "statusCode": status_code,
-        "headers": {
-            "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "*",
-        },
-        "body": json.dumps(body) if body else "",
-    }
+    return api_response(204)
