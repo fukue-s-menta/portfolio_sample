@@ -1,8 +1,15 @@
 """Shared fixtures for Lambda handler tests."""
 
 import os
+import sys
+from pathlib import Path
 
 import pytest
+
+# Add handlers and src directories to path so imports work like in Lambda
+_app_dir = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(_app_dir / "src" / "handlers"))
+sys.path.insert(0, str(_app_dir / "src"))
 
 # Set environment variables before importing handlers
 os.environ["S3_BUCKET"] = "test-bucket"

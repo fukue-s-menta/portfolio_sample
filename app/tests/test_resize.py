@@ -20,7 +20,7 @@ def _create_test_image(width=2000, height=1500):
 @patch("resize.s3")
 def test_resize_creates_three_sizes(mock_s3, mock_dynamodb, s3_event):
     """S3 event should trigger creation of thumb, medium, large versions."""
-    from handlers.resize import handler
+    from resize import handler
 
     mock_table = MagicMock()
     mock_dynamodb.Table.return_value = mock_table
@@ -45,7 +45,7 @@ def test_resize_creates_three_sizes(mock_s3, mock_dynamodb, s3_event):
 @patch("resize.s3")
 def test_resize_skips_small_image(mock_s3, mock_dynamodb, s3_event):
     """Small images should skip sizes that would require upscaling."""
-    from handlers.resize import handler
+    from resize import handler
 
     mock_table = MagicMock()
     mock_dynamodb.Table.return_value = mock_table
@@ -60,3 +60,24 @@ def test_resize_skips_small_image(mock_s3, mock_dynamodb, s3_event):
 
     # No resized images should be created (all would upscale)
     assert mock_s3.put_object.call_count == 0
+
+
+@patch("resize.dynamodb")
+@patch("resize.s3")
+def test_resize_handles_invalid_image(mock_s3, mock_dynamodb, s3_event):
+    """Invalid image data should set status to 'error' instead of crashing."""
+    from resize import handler
+
+    mock_table = MagicMock()
+    mock_dynamodb.Table.return_value = mock_table
+
+    mock_s3.get_object.return_value = {
+        "Body": MagicMock(read=MagicMock(return_value=b"not-an-image"))
+    }
+
+    handler(s3_event, None)
+
+    # DynamoDB should be updated with error status
+    mock_table.update_item.assert_called_once()
+    call_kwargs = mock_table.update_item.call_args[1]
+    assert call_kwargs["ExpressionAttributeValues"][":status"] == "error"

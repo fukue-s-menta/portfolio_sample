@@ -11,7 +11,7 @@ import pytest
 @patch("upload.s3")
 def test_upload_jpeg_success(mock_s3, mock_dynamodb, api_gateway_event):
     """JPEG image upload should return 201 with image ID."""
-    from handlers.upload import handler
+    from upload import handler
 
     mock_table = MagicMock()
     mock_dynamodb.Table.return_value = mock_table
@@ -35,7 +35,7 @@ def test_upload_jpeg_success(mock_s3, mock_dynamodb, api_gateway_event):
 @patch("upload.s3")
 def test_upload_unsupported_type(mock_s3, mock_dynamodb, api_gateway_event):
     """Unsupported content type should return 400."""
-    from handlers.upload import handler
+    from upload import handler
 
     api_gateway_event["headers"]["Content-Type"] = "text/plain"
     api_gateway_event["body"] = "not an image"
@@ -51,7 +51,7 @@ def test_upload_unsupported_type(mock_s3, mock_dynamodb, api_gateway_event):
 @patch("upload.s3")
 def test_upload_file_too_large(mock_s3, mock_dynamodb, api_gateway_event):
     """File exceeding 10MB should return 400."""
-    from handlers.upload import handler
+    from upload import handler
 
     mock_table = MagicMock()
     mock_dynamodb.Table.return_value = mock_table
