@@ -9,28 +9,7 @@ S3 にアップロードされた画像を Lambda で自動リサイズし、Clo
 
 ## Architecture
 
-```
-Client
-  │
-  ▼
-API Gateway (REST API)
-  ├── POST /images → Upload Lambda → S3 (original/)
-  │                                    │
-  │                          S3 Event Trigger
-  │                                    ▼
-  │                              Resize Lambda → S3 (resized/)
-  │                                    │
-  │                              DynamoDB (metadata)
-  │
-  ├── GET /images/{id} → Get Lambda → DynamoDB → CloudFront URL
-  │
-  └── DELETE /images/{id} → Delete Lambda → S3 + DynamoDB
-                                    │
-CloudFront ◄────────────────────────┘
-  │
-  ▼
-End User (optimized image delivery)
-```
+![architecture](docs/architecture.drawio.png)
 
 ### Tech Stack
 
